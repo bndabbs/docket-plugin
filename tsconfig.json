@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "noImplicitAny": true,
+    "lib": [ "dom", /* ... */ ]
+  },
+  "exclude": [
+    "node_modules"
+  ],
+  "extends": "../../tsconfig.json",
+  "include": [
+    "server/**/*",
+    "public/**/*"
+  ]
+}

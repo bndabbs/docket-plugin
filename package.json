@@ -1,0 +1,17 @@
+{
+  "devDependencies": {
+    "kbn-plugin-helpers": "link:../../packages/kbn-plugin-helpers"
+  },
+  "dependencies": {
+    "@elastic/elasticsearch": "^7.6.1",
+    "@grpc/proto-loader": "^0.5.3",
+    "@kbn/plugin-helpers": "link:../../packages/kbn-plugin-helpers",
+    "@types/google-protobuf": "^3.7.2",
+    "@types/yaml": "^1.2.0",
+    "grpc": "^1.24.2",
+    "grpc-tools": "^1.8.1",
+    "grpc_tools_node_protoc_ts": "^2.5.10",
+    "uuid": "^7.0.2",
+    "yaml": "^1.8.3"
+  }
+}
