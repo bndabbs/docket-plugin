@@ -31,4 +31,4 @@ stenoHost: 'ip.or.host.name:5000'
 pcapPath: '/tmp/docket'
 ```
 
-The Elasticsearch user should have rights to create an index name `.docket`.
+The Elasticsearch user should have rights to create an index named `.docket`
