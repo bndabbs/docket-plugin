@@ -1,12 +1,13 @@
-import { KibanaResponseFactory } from 'kibana/server';
-import { Client, RequestParams } from '@elastic/elasticsearch'
-import * as messages from '../protos/stenographer_pb';
-import * as services from '../protos/stenographer_grpc_pb'
-import grpc from 'grpc';
+import { Client } from '@elastic/elasticsearch';
 import fs from "fs";
-import { v4 as uuidv4 } from 'uuid';
+import grpc from 'grpc';
+import { KibanaResponseFactory } from 'kibana/server';
 import Promise from 'promise';
 import { Stream } from "stream";
+import { v4 as uuidv4 } from 'uuid';
+import * as services from '../protos/stenographer_grpc_pb';
+import * as messages from '../protos/stenographer_pb';
+import { writeToEs } from './elasticsearch'
 
 async function sendQuery(
   config: { pcapPath: string; stenoKey: string; stenoCert: string; stenoCaCert: string; stenoHost: string },
@@ -80,12 +81,6 @@ async function sendQuery(
   });
 }
 
-async function writeResultToEs(client:Client, document:RequestParams.Index) {
-  await client.index(document).then( response => {
-    console.log(response);
-  }).catch( error => { console.error(error) })
-}
-
 export async function queryStenographer(config: {
   pcapPath: string;
   stenoKey: string;
@@ -100,7 +95,7 @@ export async function queryStenographer(config: {
  return sendQuery(config, request)
     .then(function(queryResult:any) {
       console.log('status\n', queryResult.status, '\nbytes\n', queryResult.bytes, '\nuid\n', queryResult.uid);
-      writeResultToEs(esClient,
+      writeToEs(esClient,
         {
           id: queryResult.uid,
           index: 'docket',
@@ -136,7 +131,7 @@ export async function queryStenographer(config: {
         return response.internalError({body: 'gRPC status code: ' + queryResult.status.code})
       }
     }).catch(error => {
-      writeResultToEs(esClient,
+      writeToEs(esClient,
         {
           id: error.uid,
           index: 'docket',
@@ -161,15 +156,12 @@ export async function queryStenographer(config: {
     })
 }
 
-
-
 export async function getFile(
   config: { pcapPath: string; },
   esClient: Client,
   uid: string,
   response: KibanaResponseFactory)
 {
-
   const stream = new Stream.PassThrough();
   const fileName = config.pcapPath + '/' + uid;
   fs.createReadStream(fileName).pipe(stream);
@@ -180,5 +172,6 @@ export async function getFile(
     },
     body: stream
   })
-
 }
+
+

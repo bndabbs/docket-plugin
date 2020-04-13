@@ -18,7 +18,7 @@ import {
 import { Page } from './pages/page'
 import { DocumentationPage } from './pages/documentation';
 import { QueryPage } from './pages/query';
-//import { ConfigPage } from './pages/config'; //TODO add config page
+import { ConfigPage } from './pages/config';
 import { ResultsPage } from './pages/results'
 
 const Home = () => <DocumentationPage />;
@@ -72,13 +72,13 @@ export const DocketApp = ({ basename, data, application }: SearchBarComponentPar
     {
       title: 'Results Explorer',
       id: 'results',
-      component: <ResultsPage   search={data.search.search} />,
+      component: <ResultsPage search={data.search.search} />,
     },
-    // {
-    //   title: 'Configuration',
-    //   id: 'config',
-    //   component: <ConfigPage />
-    // },
+    {
+      title: 'Configuration',
+      id: 'config',
+      component: <ConfigPage search={data.search.search} />
+    },
   ];
 
   const routes = pages.map((page, i) => (

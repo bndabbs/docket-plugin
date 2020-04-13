@@ -1,27 +1,31 @@
-export const mapping = {
+export const config_mapping = {
+  properties: {
+    stenographer: {
+      properties: {
+        host: {
+          type: 'keyword'
+        },
+        client_key: {
+          type: 'keyword'
+        },
+        client_certificate: {
+          type: 'keyword'
+        },
+        certificate_authority: {
+          type: 'keyword'
+        },
+        pcap_path: {
+          type: 'keyword'
+        }
+      }
+    }
+  }
+}
+
+export const query_mapping = {
       properties: {
         '\u0040timestamp': {
           type: 'date'
-        },
-        config: {
-          properties: {
-            chunk_size: {
-              type: 'integer',
-            },
-            max_size: {
-              type: 'integer',
-            },
-            steno_hosts: {
-              type: 'nested',
-            }
-          }
-        },
-        stenographer: {
-          properties: {
-            host: {
-              type: 'keyword'
-            }
-          }
         },
         request: {
           properties: {

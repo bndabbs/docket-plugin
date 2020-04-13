@@ -21,7 +21,7 @@ async function createIndex(index: string, mapping: object, esClient: Client) {
   })
 }
 
-export async function SetupConfigIndex (
+export async function SetupEsIndex (
   index:string,
   mapping: object,
   config: {

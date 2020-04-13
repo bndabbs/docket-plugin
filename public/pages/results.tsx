@@ -4,7 +4,6 @@ import { IEsSearchRequest, IEsSearchResponse } from '../../../../src/plugins/dat
 import { ISearchGeneric } from '../../../../src/plugins/data/public/search';
 
 interface ResultsProps {
-  table: React.ReactNode;
   search: ISearchGeneric;
 }
 

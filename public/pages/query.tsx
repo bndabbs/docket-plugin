@@ -11,7 +11,8 @@ import {
 } from '@elastic/eui';
 
 import dateMath from '@elastic/datemath';
-import { v4 as uuidv4 } from 'uuid';
+
+import { addToast, removeToast } from '../components/toasts'
 
 interface QueryProps {
 }
@@ -28,7 +29,7 @@ interface QueryState {
   timeFilter: string;
   query: string;
   request: string;
-  toasts: [];
+  toasts: any[];
   submitColor: any;
   submitLabel: string;
   submitLoading: boolean;
@@ -117,27 +118,6 @@ export class QueryPage extends Component<QueryProps, QueryState> {
     }
   };
 
-  addToast = (title:string, color:string, text:string | JSX.Element, icon:string) => {
-    const toast = {
-      title: title,
-      color: color,
-      text: text,
-      iconType: icon,
-      id: uuidv4(),
-    };
-
-    this.setState({
-      toasts: this.state.toasts.concat(toast),
-    });
-  };
-
-  removeToast = (removedToast: { id: any; }) => {
-    // @ts-ignore
-    this.setState(prevState => ({
-      toasts: prevState.toasts.filter(toast => toast.id !== removedToast.id),
-    }));
-  };
-
   setSubmitButton = (state:string) => {
     if (state === 'loading') {
       this.setState({
@@ -198,7 +178,9 @@ export class QueryPage extends Component<QueryProps, QueryState> {
 
   handleSubmit = async () => {
     if (this.state.invalidSteno) {
-      return this.addToast('Invalid query', 'danger', 'Your Stenographer query is invalid', 'alert')
+      return this.setState({
+        toasts: addToast(this.state.toasts, 'Invalid query', 'danger', 'Your Stenographer query is invalid', 'alert')
+      })
     } else {
       const pathPrefix = window.location.pathname.replace(/app.*/, '');
       const request = this.timeFilter() + this.state.stenoValue;
@@ -235,9 +217,13 @@ export class QueryPage extends Component<QueryProps, QueryState> {
             return response.json()
           },err => {
           if (err.error === 'Empty result') {
-            this.addToast(err.error, 'warning', err.message, 'bell')
+            this.setState({
+              toasts: addToast(this.state.toasts, err.error, 'warning', err.message, 'bell')
+            });
           } else {
-            this.addToast(err.error, 'danger', err.message, 'alert')
+            this.setState({
+              toasts: addToast(this.state.toasts, err.error, 'danger', err.message, 'alert')
+            });
           }
         }).then( json => {
           let successText =
@@ -249,8 +235,9 @@ export class QueryPage extends Component<QueryProps, QueryState> {
                   Download PCAP</EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
-
-          this.addToast('Success','success', successText,'check')
+          this.setState({
+            toasts: addToast(this.state.toasts, 'Success','success', successText,'check')
+          });
         })
         .catch( err => console.error(err));
       }
@@ -262,7 +249,9 @@ export class QueryPage extends Component<QueryProps, QueryState> {
        <Fragment>
          <EuiGlobalToastList
            toasts={this.state.toasts}
-           dismissToast={this.removeToast}
+           dismissToast={id => this.setState({
+             toasts: removeToast(this.state.toasts, (id))
+           })}
            toastLifeTimeMs={6000}
          />
        </Fragment>

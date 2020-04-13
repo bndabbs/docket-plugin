@@ -9,8 +9,8 @@ import {
 import { DocketPluginSetup, DocketPluginStart } from './types';
 import { StenoRoutes } from './routes';
 import { loadYamlConfig } from './config';
-import { SetupConfigIndex } from './configEs';
-import { mapping } from './assets/field_mappings';
+import { SetupEsIndex } from './configEs';
+import { config_mapping, query_mapping } from './assets/field_mappings';
 
 export class DocketPlugin implements Plugin<any, any, DocketPluginSetup, DocketPluginStart> {
   private readonly logger: Logger;
@@ -32,7 +32,10 @@ export class DocketPlugin implements Plugin<any, any, DocketPluginSetup, DocketP
 
   public async start(core: CoreStart) {
     const config = loadYamlConfig('/etc/docket/config.yaml')
-    await SetupConfigIndex('docket', mapping, config)
+    await SetupEsIndex('docket', query_mapping, config)
+      .then(response => this.logger.info(response.body))
+      .catch(error => this.logger.fatal(error));
+    await SetupEsIndex('.docket-config', config_mapping, config)
       .then(response => this.logger.info(response.body))
       .catch(error => this.logger.fatal(error));
     this.logger.info('docket: Started');
