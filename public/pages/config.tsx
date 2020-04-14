@@ -3,13 +3,13 @@ import React, { Component, Fragment } from 'react';
 import { HostsTable } from '../components/hostsTable';
 import { addToast, removeToast } from '../components/toasts'
 
-
 import { IEsSearchRequest, IEsSearchResponse } from '../../../../src/plugins/data/common/search/es_search';
 import { ISearchGeneric } from '../../../../src/plugins/data/public/search';
 
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiFieldPassword,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
@@ -23,7 +23,7 @@ import {
   EuiFlexItem,
   EuiTitle,
 } from '@elastic/eui';
-import { EuiFieldPassword } from '@elastic/eui';
+import { EuiGlobalToastList } from '@elastic/eui';
 
 interface ConfigProps {
   search: ISearchGeneric;
@@ -82,20 +82,7 @@ export class ConfigPage extends Component<ConfigProps, ConfigState> {
     };
   }
 
-  renderTable() {
-    const request: IEsSearchRequest = this.getRequest({ index: '.docket-config', query: '*' });
-    return (
-      <Fragment>
-        <HostsTable
-          request={request}
-          search={(signal: AbortSignal) => this.props.search(request, { signal })}
-        />
-      </Fragment>
-    );
-  }
-
   handleSave = async () => {
-    // let hostForm = document.getElementById('hostForm');
     const formData = new FormData();
     const pathPrefix = window.location.pathname.replace(/app.*/, '');
 
@@ -103,8 +90,6 @@ export class ConfigPage extends Component<ConfigProps, ConfigState> {
     formData.append('port', this.state.port.toString());
     formData.append('cert_bundle', this.state.certsList[0]);
     formData.append('cert_password', this.state.cert_password);
-
-    console.log(formData.get('cert_bundle'));
 
     this.setSubmitButton('loading');
 
@@ -129,6 +114,7 @@ export class ConfigPage extends Component<ConfigProps, ConfigState> {
         } else return response;
 
       }).then(response => {
+          console.log(response)
           return response.json()
         },err => {
         if (err) {
@@ -178,7 +164,7 @@ export class ConfigPage extends Component<ConfigProps, ConfigState> {
       });
     };
 
-    onCertChange = (files: FileList| null )  => {
+    onCertChange = (files: FileList )  => {
       const certs = (files)
       this.setState({
         certsList: certs
@@ -190,6 +176,19 @@ export class ConfigPage extends Component<ConfigProps, ConfigState> {
         cert_password: event.target.value
       });
     };
+
+  
+  renderTable() {
+    const request: IEsSearchRequest = this.getRequest({ index: '.docket-config', query: '*' });
+    return (
+      <Fragment>
+        <HostsTable
+          request={request}
+          search={(signal: AbortSignal) => this.props.search(request, { signal })}
+        />
+      </Fragment>
+    );
+  }
 
   renderFlyout() {
     let flyout;
@@ -293,6 +292,13 @@ export class ConfigPage extends Component<ConfigProps, ConfigState> {
   render() {
     return (
       <Fragment>
+         <EuiGlobalToastList
+           toasts={this.state.toasts}
+           dismissToast={id => this.setState({
+             toasts: removeToast(this.state.toasts, (id))
+           })}
+           toastLifeTimeMs={6000}
+         />
         {this.renderFlyout()}
         {this.renderTable()}
       </Fragment>

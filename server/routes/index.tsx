@@ -55,7 +55,7 @@ const esClient = new Client(config.esClientConf);
     },
   },
   async (_context, request, response) => {
-      return await deleteStenoHost(esClient, request.params.host, response)
+      return deleteStenoHost(esClient, request.params.host, response)
   });
 
   router.get({

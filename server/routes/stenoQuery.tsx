@@ -95,7 +95,7 @@ export async function queryStenographer(config: {
  return sendQuery(config, request)
     .then(function(queryResult:any) {
       console.log('status\n', queryResult.status, '\nbytes\n', queryResult.bytes, '\nuid\n', queryResult.uid);
-      writeToEs(esClient,
+      writeToEs(esClient, response,
         {
           id: queryResult.uid,
           index: 'docket',
@@ -131,7 +131,7 @@ export async function queryStenographer(config: {
         return response.internalError({body: 'gRPC status code: ' + queryResult.status.code})
       }
     }).catch(error => {
-      writeToEs(esClient,
+      writeToEs(esClient, response,
         {
           id: error.uid,
           index: 'docket',
