@@ -4,7 +4,7 @@ import grpc from 'grpc';
 import { KibanaResponseFactory } from 'kibana/server';
 import Promise from 'promise';
 import { Stream } from "stream";
-import { v4 as uuidv4 } from 'uuid';
+import uid from 'uid';
 import * as services from '../protos/stenographer_grpc_pb';
 import * as messages from '../protos/stenographer_pb';
 import { writeToEs } from './elasticsearch'
@@ -30,15 +30,15 @@ async function sendQuery(
       Buffer.from(stenoCert)
     ),
     client = new services.StenographerClient(config.stenoHost, stenoCreds),
-    uid = uuidv4(),
-    fileName = config.pcapPath + '/' + uid,
+    id = uid(16),
+    fileName = config.pcapPath + '/' + id,
     query = new messages.PcapRequest;
 
 
   console.log(request.query);
 
   query.setQuery(request.query);
-  query.setUid(uid);
+  query.setUid(id);
 
   const call = client.retrievePcap(query);
 

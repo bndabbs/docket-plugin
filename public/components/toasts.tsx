@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
+import uid from 'uid';
 
 export function addToast(toasts:any[], title:string, color:string, text:string | JSX.Element, icon:string)  {
   const toast = {
@@ -6,7 +6,7 @@ export function addToast(toasts:any[], title:string, color:string, text:string |
     color: color,
     text: text,
     iconType: icon,
-    id: uuidv4(),
+    id: uid(),
   };
   return (
     toasts = toasts.concat(toast)

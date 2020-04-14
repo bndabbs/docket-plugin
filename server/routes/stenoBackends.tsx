@@ -1,25 +1,25 @@
 import { Client } from '@elastic/elasticsearch';
 import fs from "fs";
 import { KibanaResponseFactory } from 'kibana/server';
-import { v4 as uuidv4 } from 'uuid';
+import uid from 'uid';
 import { readPkcs12Keystore } from "../../../../src/core/server/utils/crypto";
 import { writeToEs, deleteFromEs } from './elasticsearch';
 
 export async function addStenoHost(
   config: {
-  certPath: string;
+    certPath: string;
   }, 
     esClient: Client, 
   request: {
-  host: string;
-  port: number;
-  cert_bundle: File;
-  cert_password?: string;
+    host: string;
+    port: number;
+    cert_bundle: File;
+    cert_password?: string;
   }, 
   response: KibanaResponseFactory
 ) {
   const 
-    id = uuidv4(), 
+    id = uid(), 
     p12_path = config.certPath + '/' + id + '.p12', 
     key_path = config.certPath + '/' + id + '.key', 
     cert_path = config.certPath + '/' + id + '.crt', 
@@ -59,10 +59,10 @@ export async function addStenoHost(
 export function deleteStenoHost(config: {
   certPath: string;
   },
-    esClient: Client, 
-    host: string, 
-    response: KibanaResponseFactory
-    ) {
+  esClient: Client, 
+  host: string, 
+  response: KibanaResponseFactory
+) {
   const 
     p12_path = config.certPath + '/' + host + '.p12', 
     key_path = config.certPath + '/' + host + '.key', 
@@ -82,7 +82,7 @@ export function deleteStenoHost(config: {
   removeFile(ca_path);
 
   return deleteFromEs(esClient, response, {
-            id: host,
-            index: '.docket-config',
-    });
+    id: host,
+    index: '.docket-config',
+  });
 }

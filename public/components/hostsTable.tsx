@@ -4,15 +4,14 @@ import {
   EuiFlexItem,
   EuiInMemoryTable,
   EuiEmptyPrompt,
-  EuiButton
+  EuiGlobalToastList
 } from '@elastic/eui';
-
 import {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
 } from '../../../../src/plugins/data/public/search';
-
 import { Observable } from 'rxjs';
+import { addToast, removeToast } from '../components/toasts'
 
 interface Props {
   request: IKibanaSearchRequest;
@@ -26,6 +25,7 @@ interface State {
   error?: any;
   hits: any[];
   message: any;
+  toasts: any[];
 }
 
 export class HostsTable extends Component<Props, State> {
@@ -39,6 +39,7 @@ export class HostsTable extends Component<Props, State> {
       response: undefined,
       error: undefined,
       hits: [],
+      toasts: [],
       message: (
         <EuiEmptyPrompt
           iconType="minusInCircleFilled"
@@ -117,7 +118,22 @@ export class HostsTable extends Component<Props, State> {
         headers: {
           'kbn-xsrf': 'docket',
         },
-      })
+      }).then(response => {
+        return response.json()
+      },err => {
+      if (err) {
+        this.setState({
+          toasts: addToast(this.state.toasts, err.error, 'danger', err.message, 'alert')
+        });
+      }
+    }).then(() => {
+      this.setState({
+        toasts: addToast(this.state.toasts, 'Success','success', 'Successfully removed host','check')
+      });
+    })
+    .catch( err => console.error(err));
+
+    this.search();
   };
 
   render() {
@@ -142,7 +158,7 @@ export class HostsTable extends Component<Props, State> {
         field: '_id',
         name: 'Stenographer Host',
         sortable: true,
-        truncateText: true,
+        truncateText: false,
         render: (id:string) => {
           function getDocById(hits:any) { 
             return hits._id === id;
@@ -166,6 +182,13 @@ export class HostsTable extends Component<Props, State> {
 
     return (
       <Fragment>
+        <EuiGlobalToastList
+          toasts={this.state.toasts}
+          dismissToast={id => this.setState({
+            toasts: removeToast(this.state.toasts, (id))
+          })}
+          toastLifeTimeMs={6000}
+        />
         <EuiInMemoryTable
           items={this.state.hits}
           message={this.state.message}
