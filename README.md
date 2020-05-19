@@ -17,18 +17,6 @@ Testing has only been done against the master branch of Kibana. See [this articl
 2. Create `/etc/docket/config.yaml` with the following contents, substituting your own information:
 
 ```
-esClientConf: {
-  node: 'http://localhost:9200',
-  auth: {
-    username: 'elastic',
-    password: 'changeme',
-  }
-}
-stenoKey: '/etc/stenographer/certs/docket_client.key'
-stenoCert: '/etc/stenographer/certs/docket_client.crt'
-stenoCaCert: '/etc/stenographer/certs/stenographer.crt'
-stenoHost: 'ip.or.host.name:5000'
+certPath: '/etc/docket/certs'
 pcapPath: '/tmp/docket'
 ```
-
-The Elasticsearch user should have rights to create an index named `.docket`
