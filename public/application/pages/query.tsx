@@ -34,6 +34,11 @@ export const QueryPage = (props: DocketProps) => {
     }
   };
 
+  const formatDate = (time: string, prefix: string) => {
+    const epochTime = dateMath.parse(time);
+    const isoTime = epochTime?.toISOString();
+    return prefix + ' ' + isoTime + ' ';
+  };
   const [stenoValue, setStenoValue] = useState('');
   const [selectedHosts, setSelectedHosts] = useState([]);
   const [recentlyUsedRanges, setRecentlyUsedRanges] = useState<
@@ -42,7 +47,9 @@ export const QueryPage = (props: DocketProps) => {
   const [timeDisabled, setTimeDisabled] = useState(false);
   const [startTime, setStart] = useState('now-30m');
   const [endTime, setEnd] = useState('now');
-  const [dateRange, setDateRange] = useState('');
+  const [dateRange, setDateRange] = useState(
+    formatDate(startTime, 'after') + formatDate(endTime, 'and before') + 'and '
+  );
   const [submitButton, setSubmitButton] = useState<FormButton>({
     color: 'primary',
     label: 'Submit',
@@ -99,12 +106,6 @@ export const QueryPage = (props: DocketProps) => {
     if (hosts) {
       setSelectedHosts(hosts);
     }
-  };
-
-  const formatDate = (time: string, prefix: string) => {
-    const epochTime = dateMath.parse(time);
-    const isoTime = epochTime?.toISOString();
-    return prefix + ' ' + isoTime + ' ';
   };
 
   const onTimeChange = ({ start, end }: { start: string; end: string }) => {
