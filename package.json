@@ -1,5 +1,6 @@
 {
   "devDependencies": {
+    "eslint-plugin-react-hooks": "^3.0.0",
     "kbn-plugin-helpers": "link:../../packages/kbn-plugin-helpers"
   },
   "dependencies": {

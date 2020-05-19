@@ -1,3 +1,5 @@
 import { DocketPlugin } from './plugin';
 
-export const plugin = () => new DocketPlugin();
+export const plugin = () => {
+  return new DocketPlugin();
+};

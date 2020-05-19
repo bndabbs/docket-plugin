@@ -1,46 +1,47 @@
 import { Client } from '@elastic/elasticsearch';
-import fs from "fs";
+import fs from 'fs';
 import grpc from 'grpc';
 import { KibanaResponseFactory } from 'kibana/server';
 import Promise from 'promise';
-import { Stream } from "stream";
+import { Stream } from 'stream';
 import uid from 'uid';
 import * as services from '../protos/stenographer_grpc_pb';
 import * as messages from '../protos/stenographer_pb';
-import { writeToEs } from './elasticsearch'
+import { writeToEs } from './elasticsearch';
 
 async function sendQuery(
-  config: { pcapPath: string; stenoKey: string; stenoCert: string; stenoCaCert: string; stenoHost: string },
-  request: { query: string, start: string, end: string}
-){
-  let
-    callError: undefined,
-    callStatus: {
-      code: number;
-    },
-    pcapBytes: number = 0;
+  certPath: string,
+  pcapPath: string,
+  host: { label: string; id: string },
+  query: string,
+  start: string,
+  end: string
+) {
+  let callError: undefined;
+  let callStatus: {
+    code: number;
+  };
+  let pcapBytes: number = 0;
 
-  const
-    stenoKey = fs.readFileSync(config.stenoKey),
-    stenoCert = fs.readFileSync(config.stenoCert),
-    stenoCaCert = fs.readFileSync(config.stenoCaCert),
-    stenoCreds = grpc.credentials.createSsl(
-      Buffer.from(stenoCaCert),
-      Buffer.from(stenoKey),
-      Buffer.from(stenoCert)
-    ),
-    client = new services.StenographerClient(config.stenoHost, stenoCreds),
-    id = uid(16),
-    fileName = config.pcapPath + '/' + id,
-    query = new messages.PcapRequest;
+  const path = certPath + '/' + host.id;
+  const clientKey = fs.readFileSync(`${path}.key`);
+  const clientCert = fs.readFileSync(`${path}.crt`);
+  const clientCaCert = fs.readFileSync(`${path}.ca_crt`);
+  const clientCreds = grpc.credentials.createSsl(
+    Buffer.from(clientCaCert),
+    Buffer.from(clientKey),
+    Buffer.from(clientCert)
+  );
+  const client = new services.StenographerClient(host.label, clientCreds);
+  const hostId = host.id;
+  const requestId = uid(16);
+  const fileName = pcapPath + '/' + requestId + '_' + hostId;
+  const request = new messages.PcapRequest();
 
+  request.setQuery(query);
+  request.setUid(requestId);
 
-  console.log(request.query);
-
-  query.setQuery(request.query);
-  query.setUid(id);
-
-  const call = client.retrievePcap(query);
+  const call = client.retrievePcap(request);
 
   return new Promise(function(resolve, reject) {
     call.on('data', function(pcap) {
@@ -50,128 +51,110 @@ async function sendQuery(
     });
 
     call.on('error', function(error: any) {
-      console.log('received error event');
       callError = error;
     });
 
     call.on('status', function(status) {
-      console.log('received status event');
       callStatus = status;
-      console.log(callStatus);
       const statusMessage = {
-        'uid': uid,
-        'status': callStatus,
-        'bytes': pcapBytes,
-        'query': request.query,
-        'start': request.start,
-        'end': request.end,
-        'host': config.stenoHost
-      }
+        hostId,
+        requestId,
+        status: callStatus,
+        bytes: pcapBytes,
+        query,
+        start,
+        end,
+        host: host.label,
+      };
       if (callError) {
-        reject(statusMessage)
+        reject(statusMessage);
       } else {
         resolve(statusMessage);
       }
     });
-
-    call.on('end', function() {
-      console.log('received end event');
-
-    });
   });
 }
 
-export async function queryStenographer(config: {
-  pcapPath: string;
-  stenoKey: string;
-  stenoCert: string;
-  stenoCaCert: string;
-  stenoHost: string; },
+export async function queryStenographer(
+  config: {
+    certPath: string;
+    pcapPath: string;
+  },
   esClient: Client,
-  request: { timestamp: string, query: string, start: string, end: string },
-  response: KibanaResponseFactory,
+  request: {
+    timestamp: string;
+    hosts: Array<{ label: string; id: string }>;
+    query: string;
+    start: string;
+    end: string;
+  },
+  response: KibanaResponseFactory
 ) {
-
- return sendQuery(config, request)
-    .then(function(queryResult:any) {
-      console.log('status\n', queryResult.status, '\nbytes\n', queryResult.bytes, '\nuid\n', queryResult.uid);
-      writeToEs(esClient, response,
-        {
-          id: queryResult.uid,
-          index: 'docket',
-          body: {
-            '\u0040timestamp': request.timestamp,
-            'stenographer': {
-              'host': queryResult.host
-            },
-            request: {
-              'query': queryResult.query,
-              'start': queryResult.start,
-              'end': queryResult.end
-            },
-            response: {
-              'status': queryResult.status,
-              'bytes': queryResult.bytes
-            }
-          },
-        },
-      )
-      if (queryResult.status.code === 0) {
-        if (isNaN(queryResult.bytes)) {
-          return response.noContent();
-        } else {
-          return response.ok({
+  Promise.all([
+    request.hosts.forEach(host => {
+      sendQuery(config.certPath, config.pcapPath, host, request.query, request.start, request.end)
+        .then(function(queryResult: any) {
+          writeToEs(esClient, response, {
+            index: '.docket',
             body: {
-              uid: queryResult.uid,
-              pcapSize: queryResult.pcapLength
-            }
+              timestamp: request.timestamp,
+              stenographer: {
+                host: queryResult.host,
+                id: queryResult.hostId,
+              },
+              request: {
+                query: queryResult.query,
+                start: queryResult.start,
+                end: queryResult.end,
+                id: queryResult.requestId,
+              },
+              response: {
+                status: queryResult.status,
+                bytes: queryResult.bytes,
+              },
+            },
           });
-        }
-      } else {
-        return response.internalError({body: 'gRPC status code: ' + queryResult.status.code})
-      }
-    }).catch(error => {
-      writeToEs(esClient, response,
-        {
-          id: error.uid,
-          index: 'docket',
-          body: {
-            '\u0040timestamp': request.timestamp,
-            'stenographer': {
-              'host': error.host
+        })
+        .catch(error => {
+          writeToEs(esClient, response, {
+            index: '.docket',
+            body: {
+              timestamp: request.timestamp,
+              stenographer: {
+                host: error.host,
+                id: error.hostId,
+              },
+              request: {
+                query: error.query,
+                start: error.start,
+                end: error.end,
+                id: error.requestId,
+              },
+              response: {
+                status: error.status,
+                bytes: error.bytes,
+              },
             },
-            request: {
-              'query': error.query,
-              'start': error.start,
-              'end': error.end
-            },
-            response: {
-              'status': error.status,
-              'bytes': error.bytes
-            }
-          },
-        },
-      );
-      return response.internalError({ body: error });
-    })
+          });
+        });
+    }),
+  ]);
+  return response.ok();
 }
 
 export async function getFile(
-  config: { pcapPath: string; },
-  esClient: Client,
-  uid: string,
-  response: KibanaResponseFactory)
-{
+  config: { pcapPath: string },
+  id: string,
+  response: KibanaResponseFactory
+) {
   const stream = new Stream.PassThrough();
-  const fileName = config.pcapPath + '/' + uid;
+  const fileName = config.pcapPath + '/' + id;
   fs.createReadStream(fileName).pipe(stream);
 
   return response.ok({
     headers: {
       'Content-Type': 'application/vnd.tcpdump.pcap',
     },
-    body: stream
-  })
+    body: stream,
+  });
 }
-
-

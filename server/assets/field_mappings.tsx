@@ -1,4 +1,4 @@
-export const config_mapping = {
+export const configMapping = {
   properties: {
     stenographer: {
       properties: {
@@ -22,7 +22,7 @@ export const config_mapping = {
   }
 }
 
-export const query_mapping = {
+export const queryMapping = {
       properties: {
         '\u0040timestamp': {
           type: 'date'
