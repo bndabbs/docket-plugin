@@ -49,7 +49,7 @@ export async function StenoRoutes(
           host: schema.string(),
           port: schema.number(),
           cert_password: schema.string(),
-          cert_bundle: schema.stream(),
+          cert_bundle: schema.any(),
         }),
       },
     },

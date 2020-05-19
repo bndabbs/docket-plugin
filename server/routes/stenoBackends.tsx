@@ -2,7 +2,6 @@ import { Client } from '@elastic/elasticsearch';
 import fs from 'fs';
 import { KibanaResponseFactory } from 'kibana/server';
 import uid from 'uid';
-import { Stream } from 'stream';
 import { readPkcs12Keystore } from '../../../../src/core/server/utils/crypto';
 import { writeToEs, deleteFromEs } from './elasticsearch';
 
@@ -14,8 +13,8 @@ export async function addStenoHost(
   request: {
     host: string;
     port: number;
-    cert_bundle: Stream;
-    cert_password: string;
+    cert_bundle: File;
+    cert_password?: string;
   },
   response: KibanaResponseFactory
 ) {
