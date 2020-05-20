@@ -5,14 +5,15 @@ import {
   EuiButton,
   EuiButtonIcon,
   formatDate,
-  EuiInMemoryTable,
+  EuiBasicTable,
+  EuiBasicTableColumn,
   EuiSpacer,
 } from '@elastic/eui';
 import { DocketProps, SearchStateProps, StenoQueries } from '../../types';
 import { search } from '../components';
 
 interface ResultsList {
-  timestamp: string;
+  timestamp: Date;
   bytes: number;
   query: string;
   host: string;
@@ -57,7 +58,7 @@ export const ResultsPage = (props: DocketProps) => {
     const results: ResultsList[] = [];
     if (!stenoResultsState.error && stenoResultsState.response) {
       if (stenoResultsState.response.rawResponse.hits.total > 0)
-        stenoResultsState.response.rawResponse.hits.hits.map(hit => {
+        stenoResultsState.response.rawResponse.hits.hits.map((hit: { _source: StenoQueries }) => {
           const source = hit._source;
           results.push({
             timestamp: source.timestamp,
@@ -69,7 +70,6 @@ export const ResultsPage = (props: DocketProps) => {
           });
         });
     }
-    console.log(results);
     setStenoResults(results);
   }, [stenoResultsState]);
 
@@ -122,7 +122,9 @@ export const ResultsPage = (props: DocketProps) => {
     },
   ];
 
-  const columns = [
+  const items = (stenoResults as unknown) as string[];
+
+  const columns: Array<EuiBasicTableColumn<string>> = [
     {
       field: 'timestamp',
       name: 'Timestamp',
@@ -170,13 +172,7 @@ export const ResultsPage = (props: DocketProps) => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
-      <EuiInMemoryTable
-        items={stenoResults}
-        loading={stenoResultsState.searching}
-        columns={columns}
-        pagination={false}
-        sorting={false}
-      />
+      <EuiBasicTable items={items} loading={stenoResultsState.searching} columns={columns} />
     </Fragment>
   );
 };
