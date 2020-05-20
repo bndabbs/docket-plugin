@@ -55,6 +55,7 @@ export const QueryPage = (props: DocketProps) => {
     label: 'Submit',
     loading: false,
   });
+  // eslint-disable-next-line prettier/prettier
   const [stenoHosts, setStenoHosts] = useState<Array<{ label: string; id: string }> | undefined>([]);
   const [stenoHostsState, setStenoHostsState] = useState<SearchStateProps<StenoHosts> | any>({
     searching: true,
@@ -193,7 +194,7 @@ export const QueryPage = (props: DocketProps) => {
           <EuiComboBox
             options={stenoHosts}
             selectedOptions={selectedHosts}
-            onChange={handleHostsChange}
+            onChange={() => handleHostsChange}
             isClearable={true}
             isLoading={props.searchState?.searching}
           />

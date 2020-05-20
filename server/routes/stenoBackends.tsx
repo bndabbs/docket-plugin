@@ -24,16 +24,18 @@ export async function addStenoHost(
   async function writeCerts() {
     fs.writeFileSync(`${path}.p12`, Buffer.from(request.cert_bundle));
     const certs = readPkcs12Keystore(`${path}.p12`, request.cert_password);
-    fs.writeFile(`${path}.key`, certs.key, err => {
-      if (err) return response.internalError({ body: err });
-    });
-    fs.writeFile(`${path}.crt`, certs.cert, err => {
-      if (err) return response.internalError({ body: err });
-    });
-    fs.writeFile(`${path}.ca_crt`, certs.ca, err => {
-      if (err) return response.internalError({ body: err });
-    });
-    return response.ok();
+    if (certs.cert && certs.key && certs.ca) {
+      fs.writeFile(`${path}.key`, certs.key, err => {
+        if (err) return response.internalError({ body: err });
+      });
+      fs.writeFile(`${path}.crt`, certs.cert, err => {
+        if (err) return response.internalError({ body: err });
+      });
+      fs.writeFile(`${path}.ca_crt`, certs.ca[0], err => {
+        if (err) return response.internalError({ body: err });
+      });
+      return response.ok();
+    } else return response.internalError();
   }
 
   await writeCerts();

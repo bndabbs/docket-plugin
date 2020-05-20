@@ -225,6 +225,8 @@ export const ConfigPage = (props: DocketProps) => {
       });
   };
 
+  const items = (stenoHosts as unknown) as string[];
+
   const actions = [
     {
       render: (item: any) => {
@@ -264,7 +266,7 @@ export const ConfigPage = (props: DocketProps) => {
     <Fragment>
       <EuiButton onClick={() => handleHostButton()}>Add Host</EuiButton>
       <EuiBasicTable
-        items={stenoHosts}
+        items={items}
         noItemsMessage={message}
         loading={stenoHostsState.searching}
         columns={columns}
