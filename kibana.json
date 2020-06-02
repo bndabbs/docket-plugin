@@ -4,6 +4,6 @@
   "server": true,
   "ui": true,
   "configPath": ["docket"],
-  "requiredPlugins": ["data","uiActions","navigation"],
+  "requiredPlugins": ["data","navigation"],
   "optionalPlugins": []
 }
