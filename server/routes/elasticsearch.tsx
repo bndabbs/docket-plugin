@@ -1,5 +1,5 @@
 import { Client, RequestParams } from '@elastic/elasticsearch';
-import { KibanaResponseFactory, IKibanaResponse } from 'kibana/server';
+import { KibanaResponseFactory, IKibanaResponse } from '../../../../src/core/server';
 
 export async function writeToEs(
   client: Client,

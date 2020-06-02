@@ -1,10 +1,9 @@
 import { Client } from '@elastic/elasticsearch';
 import fs from 'fs';
 import grpc from 'grpc';
-import { KibanaResponseFactory } from 'kibana/server';
-import Promise from 'promise';
 import { Stream } from 'stream';
 import uid from 'uid';
+import { KibanaResponseFactory } from '../../../../src/core/server';
 import * as services from '../protos/stenographer_grpc_pb';
 import * as messages from '../protos/stenographer_pb';
 import { writeToEs } from './elasticsearch';
@@ -43,18 +42,18 @@ async function sendQuery(
 
   const call = client.retrievePcap(request);
 
-  return new Promise(function(resolve, reject) {
-    call.on('data', function(pcap) {
+  return new Promise(function (resolve, reject) {
+    call.on('data', function (pcap) {
       fs.appendFileSync(fileName, Buffer.from(pcap.array[1]), { flag: 'a' });
       // @ts-ignore
       pcapBytes += Buffer.from(pcap.array[1]).byteLength;
     });
 
-    call.on('error', function(error: any) {
+    call.on('error', function (error: any) {
       callError = error;
     });
 
-    call.on('status', function(status) {
+    call.on('status', function (status) {
       callStatus = status;
       const statusMessage = {
         hostId,
@@ -91,9 +90,9 @@ export async function queryStenographer(
   response: KibanaResponseFactory
 ) {
   Promise.all([
-    request.hosts.forEach(host => {
+    request.hosts.forEach((host) => {
       sendQuery(config.certPath, config.pcapPath, host, request.query, request.start, request.end)
-        .then(function(queryResult: any) {
+        .then(function (queryResult: any) {
           writeToEs(esClient, response, {
             index: '.docket',
             body: {
@@ -115,7 +114,7 @@ export async function queryStenographer(
             },
           });
         })
-        .catch(error => {
+        .catch((error) => {
           writeToEs(esClient, response, {
             index: '.docket',
             body: {

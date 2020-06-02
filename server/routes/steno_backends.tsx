@@ -1,7 +1,7 @@
 import { Client } from '@elastic/elasticsearch';
 import fs from 'fs';
-import { KibanaResponseFactory } from 'kibana/server';
 import uid from 'uid';
+import { KibanaResponseFactory } from '../../../../src/core/server';
 import { readPkcs12Keystore } from '../../../../src/core/server/utils/crypto';
 import { writeToEs, deleteFromEs } from './elasticsearch';
 

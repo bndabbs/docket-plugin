@@ -1,8 +1,7 @@
 // GENERATED CODE -- DO NOT EDIT!
 
-'use strict';
-var grpc = require('grpc');
-var stenographer_pb = require('./stenographer_pb.js');
+const grpc = require('grpc');
+const stenographer_pb = require('./stenographer_pb.js');
 
 function serialize_steno_PcapRequest(arg) {
   if (!(arg instanceof stenographer_pb.PcapRequest)) {
@@ -26,8 +25,7 @@ function deserialize_steno_PcapResponse(buffer_arg) {
   return stenographer_pb.PcapResponse.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
-
-var StenographerService = exports.StenographerService = {
+const StenographerService = (exports.StenographerService = {
   retrievePcap: {
     path: '/steno.Stenographer/RetrievePcap',
     requestStream: false,
@@ -39,6 +37,6 @@ var StenographerService = exports.StenographerService = {
     responseSerialize: serialize_steno_PcapResponse,
     responseDeserialize: deserialize_steno_PcapResponse,
   },
-};
+});
 
 exports.StenographerClient = grpc.makeGenericClientConstructor(StenographerService);

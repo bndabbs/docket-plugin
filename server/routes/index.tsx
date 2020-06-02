@@ -1,23 +1,11 @@
-import { IRouter } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 import { Client } from '@elastic/elasticsearch';
-import { queryStenographer, getFile } from './stenoQuery';
-import { addStenoHost, deleteStenoHost } from './stenoBackends';
+import { IRouter } from '../../../../src/core/server';
+import { queryStenographer, getFile } from './steno_query';
+import { addStenoHost, deleteStenoHost } from './steno_backends';
+import { DocketConfigType } from '../config';
 
-export async function StenoRoutes(
-  router: IRouter,
-  config: {
-    esClientConf: object;
-    pcapPath: string;
-    stenoKey: string;
-    stenoCert: string;
-    stenoCaCert: string;
-    stenoHost: string;
-    certPath: string;
-  }
-) {
-  const esClient = new Client(config.esClientConf);
-
+export async function StenoRoutes(router: IRouter, config: DocketConfigType, esClient: Client) {
   router.post(
     {
       path: '/api/docket/query',
