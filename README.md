@@ -1,8 +1,6 @@
 # Docket
 
-Docket is a web Frontend to Google Stenographer
-
-![Docket Video](docket.gif)  
+Docket is a web Frontend to Google Stenographer that allows you to securely submit requests to one or many Stenographer hosts using a simple web UI.
 
 ---
 
@@ -52,3 +50,10 @@ openssl pkcs12 -export -out kibana.p12 -inkey kibana.dabbs.lan.key -in kibana.da
 ```
 
 At this point you can open Kibana in your browser and navigate to `app/docket/config` to point Kibana to your Stenographer host(s). Make sure that the hostname/IP you use matches the values in the server certificate.
+
+---
+
+![About](img/about.png)  
+![Query](img/query.png)  
+![Results](img/results.png)  
+![Config](img/config.png)  
