@@ -1,17 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
-import { CoreStart } from 'src/core/public';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 import { EuiPage } from '@elastic/eui';
-import { ConfigPage, DocumentationPage, Page, QueryPage, ResultsPage } from './pages';
-import { DocketProps, PageDef, SearchStateProps, StenoHosts, StenoQueries } from '../types';
+import { AppMountParameters, CoreStart } from '../../../../src/core/public';
+import { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/public';
+import { ConfigPage, HomePage, Page, QueryPage, ResultsPage } from './pages';
+import { DocketPluginProps, PageDef, SearchStateProps, StenoHosts, StenoQueries } from '../types';
 import { Nav, search } from './components';
+import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 
-const Home = () => <DocumentationPage />;
+interface DocketAppDeps {
+  application: CoreStart['application'];
+  basename: string;
+  notifications: CoreStart['notifications'];
+  navigation: NavigationPublicPluginStart;
+  data: DataPublicPluginStart;
+}
 
 const buildPage = (page: PageDef) => <Page title={page.title}>{page.component}</Page>;
 
-export const DocketApp = ({ ...props }: DocketProps) => {
+export const DocketApp = ({
+  application,
+  basename,
+  notifications,
+  navigation,
+  data,
+}: DocketAppDeps) => {
   const [stenoHostsState, setStenoHostsState] = useState<SearchStateProps<StenoHosts> | any>({
     searching: true,
     shouldUpdate: true,
@@ -45,43 +59,43 @@ export const DocketApp = ({ ...props }: DocketProps) => {
   useEffect(() => {
     if (stenoHostsState.shouldUpdate) {
       search({
-        ...{ ...props.data },
+        ...{ ...data },
         request: request('.docket-config'),
         setSearchState: setStenoHostsState,
       });
     }
-  }, [stenoHostsState.shouldUpdate, props.data]);
+  }, [stenoHostsState.shouldUpdate, data]);
 
   useEffect(() => {
     if (stenoResultsState.shouldUpdate) {
       search({
-        ...{ ...props.data },
+        ...{ ...data },
         request: request('.docket'),
         setSearchState: setStenoResultsState,
       });
     }
-  }, [stenoResultsState.shouldUpdate, props.data]);
+  }, [stenoResultsState.shouldUpdate, data]);
 
   const pages: PageDef[] = [
     {
       id: 'home',
       title: 'About',
-      component: <Home />,
+      component: <HomePage />,
     },
     {
       title: 'Query Builder',
       id: 'query',
-      component: <QueryPage {...{ ...props }} />,
+      component: <QueryPage {...{ data, notifications, navigation }} />,
     },
     {
       title: 'Results Explorer',
       id: 'results',
-      component: <ResultsPage {...{ ...props }} />,
+      component: <ResultsPage {...{ data, notifications, navigation }} />,
     },
     {
       title: 'Configuration',
       id: 'config',
-      component: <ConfigPage {...{ ...props }} />,
+      component: <ConfigPage {...{ data, notifications, navigation }} />,
     },
   ];
 
@@ -90,21 +104,30 @@ export const DocketApp = ({ ...props }: DocketProps) => {
   ));
 
   return (
-    <Router basename={props.basename}>
+    <Router basename={basename}>
+      <navigation.ui.TopNavMenu appName="docket" showSearchBar={false} />
       <EuiPage>
-        <Nav navigateToApp={props.application.navigateToApp} pages={pages} />
-        <Route path="/" exact component={Home} />
+        <Nav navigateToApp={application.navigateToApp} pages={pages} />
+        <Route path="/" exact component={HomePage} />
         {routes}
       </EuiPage>
     </Router>
   );
 };
 
-export const renderApp = (i18nStart: CoreStart['i18n'], props: DocketProps, element: Element) => {
+export const renderApp = (
+  { application, notifications }: CoreStart,
+  { navigation, data }: DocketPluginProps,
+  { appBasePath, element }: AppMountParameters
+) => {
   ReactDOM.render(
-    <i18nStart.Context>
-      <DocketApp {...props} />
-    </i18nStart.Context>,
+    <DocketApp
+      application={application}
+      basename={appBasePath}
+      notifications={notifications}
+      navigation={navigation}
+      data={data}
+    />,
     element
   );
 

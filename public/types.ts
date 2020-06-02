@@ -1,7 +1,30 @@
-import { DataPublicPluginStart, IEsSearchResponse } from 'src/plugins/data/public';
-import { CoreStart, AppMountContext, AppMountParameters, CoreSetup } from 'kibana/public';
 import { RouteComponentProps } from 'react-router-dom';
+import { IEsSearchResponse, DataPublicPluginStart } from '../../../src/plugins/data/public';
+import { AppMountContext, CoreStart } from '../../../src/core/public';
+import { KibanaLegacySetup, KibanaLegacyStart } from '../../../src/plugins/kibana_legacy/public';
+import { NavigationPublicPluginStart } from '../../../src/plugins/navigation/public';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface DocketPluginSetup {}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface DocketPluginStart {}
+
+export interface DocketPluginSetupDeps {
+  kibanaLegacy: KibanaLegacySetup;
+}
+export interface DocketPluginStartDeps {
+  data: DataPublicPluginStart;
+  navigation: NavigationPublicPluginStart;
+  notifications: CoreStart['notifications'];
+  searchState?: SearchStateProps;
+  kibanaLegacy: KibanaLegacyStart;
+}
+export interface DocketPluginProps {
+  data: DataPublicPluginStart;
+  navigation: NavigationPublicPluginStart;
+  notifications: CoreStart['notifications'];
+  searchState?: SearchStateProps;
+}
 export interface PageDef {
   title: string;
   id: string;
@@ -13,14 +36,6 @@ export interface SearchStateProps<T = unknown> {
   shouldUpdate: boolean;
   error: Error | undefined;
   response: IEsSearchResponse<T>;
-}
-
-export interface DocketProps {
-  application: CoreStart['application'];
-  basename: AppMountParameters['appBasePath'];
-  data: DataPublicPluginStart;
-  notifications: CoreSetup['notifications'];
-  searchState?: SearchStateProps;
 }
 
 export interface StenoHosts {

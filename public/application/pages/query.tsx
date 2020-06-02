@@ -3,6 +3,7 @@ import {
   ButtonColor,
   EuiButton,
   EuiComboBox,
+  EuiComboBoxOptionOption,
   EuiFieldSearch,
   EuiForm,
   EuiFormRow,
@@ -12,7 +13,7 @@ import {
 } from '@elastic/eui';
 import dateMath from '@elastic/datemath';
 import lodashCloneDeep from 'lodash.clonedeep';
-import { DocketProps, SearchStateProps, StenoHosts } from '../../types';
+import { DocketPluginProps, SearchStateProps, StenoHosts } from '../../types';
 import { search } from '../components';
 
 interface FormButton {
@@ -21,7 +22,12 @@ interface FormButton {
   loading: boolean;
 }
 
-export const QueryPage = (props: DocketProps) => {
+interface Hosts {
+  id: string;
+  label: string;
+}
+
+export const QueryPage = (props: DocketPluginProps) => {
   const showUpdateButton = false;
   const isAutoRefreshOnly = false;
 
@@ -40,7 +46,9 @@ export const QueryPage = (props: DocketProps) => {
     return prefix + ' ' + isoTime + ' ';
   };
   const [stenoValue, setStenoValue] = useState('');
-  const [selectedHosts, setSelectedHosts] = useState([]);
+  const [selectedHosts, setSelectedHosts] = useState<
+    Array<EuiComboBoxOptionOption<Hosts | unknown>>
+  >([]);
   const [recentlyUsedRanges, setRecentlyUsedRanges] = useState<
     Array<{ start: string; end: string }>
   >([]);
@@ -56,13 +64,20 @@ export const QueryPage = (props: DocketProps) => {
     loading: false,
   });
   // eslint-disable-next-line prettier/prettier
-  const [stenoHosts, setStenoHosts] = useState<Array<{ label: string; id: string }> | undefined>([]);
+  const [stenoHosts, setStenoHosts] = useState<Array<EuiComboBoxOptionOption<Hosts | unknown>>>([]);
   const [stenoHostsState, setStenoHostsState] = useState<SearchStateProps<StenoHosts> | any>({
     searching: true,
     shouldUpdate: true,
     error: undefined,
     response: undefined,
   });
+
+  function hasResponse(
+    // eslint-disable-next-line no-shadow
+    stenoHostsState: SearchStateProps<StenoHosts> | any
+  ): stenoHostsState is SearchStateProps<StenoHosts> {
+    return (stenoHostsState as SearchStateProps<StenoHosts>).response !== undefined;
+  }
 
   function request(index: string) {
     return {
@@ -91,7 +106,7 @@ export const QueryPage = (props: DocketProps) => {
   useEffect(() => {
     const hosts: Array<{ label: string; id: string }> = [];
 
-    if (!stenoHostsState.error && stenoHostsState.response) {
+    if (hasResponse(stenoHostsState)) {
       if (stenoHostsState.response.rawResponse.hits.total > 0)
         stenoHostsState.response.rawResponse.hits.hits.map((hit: any) => {
           hosts.push({
@@ -103,17 +118,11 @@ export const QueryPage = (props: DocketProps) => {
     setStenoHosts(hosts);
   }, [stenoHostsState]);
 
-  const handleHostsChange = (hosts: []) => {
-    if (hosts) {
-      setSelectedHosts(hosts);
-    }
-  };
-
   const onTimeChange = ({ start, end }: { start: string; end: string }) => {
     const inputRange = { start, end };
     let clonedRanges = lodashCloneDeep(recentlyUsedRanges);
 
-    clonedRanges = clonedRanges.filter(range => {
+    clonedRanges = clonedRanges.filter((range) => {
       const isDuplicate = range.start === start && range.end === end;
       return !isDuplicate;
     });
@@ -142,7 +151,7 @@ export const QueryPage = (props: DocketProps) => {
   const updateSubmitButton = (button: string) => {
     switch (button) {
       case 'saving':
-        setSubmitButton(prevState => {
+        setSubmitButton((prevState) => {
           return { ...prevState, label: 'Saving...', loading: true };
         });
         break;
@@ -179,11 +188,11 @@ export const QueryPage = (props: DocketProps) => {
           'Content-Type': 'application/json',
         },
       })
-        .then(_response => {
+        .then((_response) => {
           updateSubmitButton('reset');
           props.notifications.toasts.addSuccess({ text: 'Request submitted' });
         })
-        .catch(err => props.notifications.toasts.addError(err, { title: 'Error' }));
+        .catch((err) => props.notifications.toasts.addError(err, { title: 'Error' }));
     }
   };
 
@@ -194,7 +203,7 @@ export const QueryPage = (props: DocketProps) => {
           <EuiComboBox
             options={stenoHosts}
             selectedOptions={selectedHosts}
-            onChange={() => handleHostsChange}
+            onChange={(hosts) => setSelectedHosts(hosts)}
             isClearable={true}
             isLoading={props.searchState?.searching}
           />
@@ -203,7 +212,7 @@ export const QueryPage = (props: DocketProps) => {
           <EuiFieldSearch
             placeholder="Stenographer Query"
             value={stenoValue}
-            onChange={e => onStenoChange(e)}
+            onChange={(e) => onStenoChange(e)}
             isInvalid={!isValidSteno(stenoValue)}
           />
         </EuiFormRow>
@@ -222,7 +231,7 @@ export const QueryPage = (props: DocketProps) => {
         <EuiFormRow>
           <EuiSwitch
             label="Disable time filter"
-            onChange={e => setTimeDisabled(e.target.checked)}
+            onChange={(e) => setTimeDisabled(e.target.checked)}
             checked={timeDisabled}
           />
         </EuiFormRow>

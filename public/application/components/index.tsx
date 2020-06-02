@@ -1,2 +1,2 @@
-export { Nav } from './sideNav';
-export { search } from './esSearch';
+export { Nav } from './side_nav';
+export { search } from './es_search';

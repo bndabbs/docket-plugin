@@ -1,31 +1,31 @@
 import { Dispatch, SetStateAction } from 'react';
-import { IEsSearchRequest } from 'src/plugins/data/public';
-import { DocketProps, SearchStateProps } from '../../types';
+import { IEsSearchRequest } from '../../../../../src/plugins/data/public';
+import { DocketPluginProps, SearchStateProps } from '../../types';
 
 interface EsProps {
-  search: DocketProps['data']['search'];
+  search: DocketPluginProps['data']['search'];
   request: IEsSearchRequest;
   setSearchState: Dispatch<SetStateAction<SearchStateProps>>;
 }
 
 export function search(props: EsProps) {
-  props.setSearchState(prevState => {
+  props.setSearchState((prevState) => {
     return { ...prevState, searching: true };
   });
   function observable() {
     props.search.search(props.request).subscribe(
-      response => {
-        props.setSearchState(prevState => {
+      (response) => {
+        props.setSearchState((prevState) => {
           return { ...prevState, error: undefined, response };
         });
       },
-      error => {
-        props.setSearchState(prevState => {
+      (error) => {
+        props.setSearchState((prevState) => {
           return { ...prevState, error, searching: false, shouldUpdate: false };
         });
       },
       () => {
-        props.setSearchState(prevState => {
+        props.setSearchState((prevState) => {
           return { ...prevState, shouldUpdate: false, searching: false, error: undefined };
         });
       }

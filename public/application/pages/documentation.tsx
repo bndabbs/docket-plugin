@@ -2,7 +2,7 @@ import React from 'react';
 
 import { EuiText, EuiPageContentBody, EuiListGroup } from '@elastic/eui';
 
-export const DocumentationPage = () => (
+export const HomePage = () => (
   <EuiPageContentBody>
     <EuiText>
       <p>

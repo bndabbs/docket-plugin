@@ -21,7 +21,7 @@ import {
 import _ from 'lodash';
 import { ButtonColor, EuiButton } from '@elastic/eui';
 import { search } from '../components';
-import { DocketProps, SearchStateProps, StenoHosts } from '../../types';
+import { DocketPluginProps, SearchStateProps, StenoHosts } from '../../types';
 
 interface HostsList {
   _id: string;
@@ -32,7 +32,7 @@ interface Form {
   host: string;
   port: string;
   certs?: FileList;
-  certIsValid: boolean;
+  invalidCert: boolean;
   certPassword: string;
 }
 
@@ -42,14 +42,14 @@ interface FormButton {
   loading: boolean;
 }
 
-export const ConfigPage = (props: DocketProps) => {
+export const ConfigPage = (props: DocketPluginProps) => {
   const [stenoHosts, setStenoHosts] = useState<HostsList[]>([]);
   const [message, setMessage] = useState<JSX.Element | undefined>();
   const [formValues, setFormValues] = useState<Form>({
     host: '',
     port: '',
     certs: undefined,
-    certIsValid: true,
+    invalidCert: false,
     certPassword: '',
   });
   const [submitButton, setSubmitButton] = useState<FormButton>({
@@ -64,6 +64,12 @@ export const ConfigPage = (props: DocketProps) => {
     error: undefined,
     response: undefined,
   });
+
+  function hasResponse(
+    stenoHostsState: SearchStateProps<StenoHosts> | any
+  ): stenoHostsState is SearchStateProps<StenoHosts> {
+    return (stenoHostsState as SearchStateProps<StenoHosts>).response !== undefined;
+  }
 
   function request(index: string) {
     return {
@@ -105,9 +111,9 @@ export const ConfigPage = (props: DocketProps) => {
 
     const hosts: HostsList[] = [];
 
-    if (!stenoHostsState.error && stenoHostsState.response) {
+    if (hasResponse(stenoHostsState)) {
       if (stenoHostsState.response.rawResponse.hits.total > 0)
-        stenoHostsState.response.rawResponse.hits.hits.map(hit => {
+        stenoHostsState.response.rawResponse.hits.hits.map((hit) => {
           hosts.push({
             _id: hit._id,
             hostname: `${hit._source.stenographer.host}:${hit._source.stenographer.port}`,
@@ -124,7 +130,7 @@ export const ConfigPage = (props: DocketProps) => {
   const updateSubmitButton = (button: string) => {
     switch (button) {
       case 'saving':
-        setSubmitButton(prevState => {
+        setSubmitButton((prevState) => {
           return { ...prevState, label: 'Saving...', loading: true };
         });
         break;
@@ -149,11 +155,7 @@ export const ConfigPage = (props: DocketProps) => {
   }
 
   const handleSave = async () => {
-    if (!formValues.certs) {
-      setFormValues(prevState => {
-        return { ...prevState, certIsValid: false };
-      });
-    } else {
+    if (formValues.certs) {
       const formData = new FormData();
       const pathPrefix = window.location.pathname.replace(/app.*/, '');
 
@@ -171,7 +173,7 @@ export const ConfigPage = (props: DocketProps) => {
           'kbn-xsrf': 'docket',
         },
       })
-        .then(response => {
+        .then((response) => {
           updateSubmitButton('reset');
           setFlyoutVisible(false);
           if (response.status === 500) {
@@ -181,10 +183,10 @@ export const ConfigPage = (props: DocketProps) => {
           } else return response;
         })
         .then(
-          response => {
+          (response) => {
             return response.json();
           },
-          err => {
+          (err) => {
             if (err) {
               props.notifications.toasts.addError(err, { title: 'Something went wrong!' });
             }
@@ -196,6 +198,10 @@ export const ConfigPage = (props: DocketProps) => {
           });
           props.notifications.toasts.addSuccess('Successfully added host');
         });
+    } else {
+      setFormValues((prevState) => {
+        return { ...prevState, invalidCert: true };
+      });
     }
   };
 
@@ -208,10 +214,10 @@ export const ConfigPage = (props: DocketProps) => {
       },
     })
       .then(
-        response => {
+        (response) => {
           return response.json();
         },
-        err => {
+        (err) => {
           if (err) {
             props.notifications.toasts.addError(err, { title: 'Something went wrong!' });
           }
@@ -317,11 +323,11 @@ export const ConfigPage = (props: DocketProps) => {
                 </EuiFormRow>
                 <EuiFormRow label="Certificate bundle">
                   <EuiFilePicker
-                    isInvalid={!formValues.certIsValid}
+                    isInvalid={formValues.invalidCert}
                     onChange={(files: FileList | null) => {
                       if (files && files?.length > 0) {
-                        setFormValues(prevState => {
-                          return { ...prevState, certs: files, certIsValid: true };
+                        setFormValues((prevState) => {
+                          return { ...prevState, certs: files, invalidCert: false };
                         });
                       }
                     }}

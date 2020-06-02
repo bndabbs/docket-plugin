@@ -9,7 +9,7 @@ import {
   EuiBasicTableColumn,
   EuiSpacer,
 } from '@elastic/eui';
-import { DocketProps, SearchStateProps, StenoQueries } from '../../types';
+import { DocketPluginProps, SearchStateProps, StenoQueries } from '../../types';
 import { search } from '../components';
 
 interface ResultsList {
@@ -21,7 +21,7 @@ interface ResultsList {
   requestId: string;
 }
 
-export const ResultsPage = (props: DocketProps) => {
+export const ResultsPage = (props: DocketPluginProps) => {
   const [stenoResults, setStenoResults] = useState<ResultsList[]>([]);
   const [stenoResultsState, setStenoResultsState] = useState<SearchStateProps<StenoQueries> | any>({
     searching: true,
@@ -29,6 +29,12 @@ export const ResultsPage = (props: DocketProps) => {
     error: undefined,
     response: undefined,
   });
+
+  function hasResponse(
+    stenoHostsState: SearchStateProps<StenoQueries> | any
+  ): stenoHostsState is SearchStateProps<StenoQueries> {
+    return (stenoHostsState as SearchStateProps<StenoQueries>).response !== undefined;
+  }
 
   function request(index: string) {
     return {
@@ -56,7 +62,7 @@ export const ResultsPage = (props: DocketProps) => {
 
   useEffect(() => {
     const results: ResultsList[] = [];
-    if (!stenoResultsState.error && stenoResultsState.response) {
+    if (hasResponse(stenoResultsState)) {
       if (stenoResultsState.response.rawResponse.hits.total > 0)
         stenoResultsState.response.rawResponse.hits.hits.map((hit: { _source: StenoQueries }) => {
           const source = hit._source;
@@ -82,8 +88,8 @@ export const ResultsPage = (props: DocketProps) => {
         'kbn-xsrf': 'docket',
       },
     })
-      .then(response => response.blob())
-      .then(blob => {
+      .then((response) => response.blob())
+      .then((blob) => {
         const link = document.createElement('a');
         link.download = id + '.pcap';
         link.href = URL.createObjectURL(blob);

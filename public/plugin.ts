@@ -1,33 +1,33 @@
-import { CoreSetup, Plugin } from 'src/core/public';
-import { AppMountParameters } from 'kibana/public';
-import { FeaturesPluginSetup } from '../../../x-pack/plugins/features/public';
-import { DocketProps } from './types';
+import { CoreSetup, Plugin, AppMountParameters, CoreStart } from '../../../src/core/public';
+import {
+  DocketPluginSetup,
+  DocketPluginStart,
+  DocketPluginSetupDeps,
+  DocketPluginStartDeps,
+} from './types';
 
-export class DocketPlugin implements Plugin<void, void, {}, DocketProps> {
-  public setup(core: CoreSetup<DocketProps>, _plugins: { feature: FeaturesPluginSetup }) {
-    const notifications = core;
+export class DocketPlugin
+  implements
+    Plugin<DocketPluginSetup, DocketPluginStart, DocketPluginSetupDeps, DocketPluginStartDeps> {
+  public setup(core: CoreSetup<DocketPluginStartDeps, DocketPluginStart>): DocketPluginSetup {
+    // Register an application into the side navigation menu
     core.application.register({
       id: 'docket',
       title: 'Docket',
       async mount(params: AppMountParameters) {
         const [coreStart, depsStart] = await core.getStartServices();
+        // Load application bundle
         const { renderApp } = await import('./application');
-
-        return renderApp(
-          coreStart.i18n,
-          {
-            application: coreStart.application,
-            basename: params.appBasePath,
-            data: depsStart.data,
-            notifications: notifications.notifications,
-          },
-          params.element
-        );
+        // Get start services as specified in kibana.json
+        return renderApp(coreStart, depsStart as DocketPluginStartDeps, params);
       },
     });
+    return {};
   }
 
-  public start() {}
+  public start(core: CoreStart): DocketPluginStart {
+    return {};
+  }
 
   public stop() {}
 }
