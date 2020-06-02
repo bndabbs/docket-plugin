@@ -1,18 +1,41 @@
 {
-  "devDependencies": {
-    "eslint-plugin-react-hooks": "^3.0.0",
-    "kbn-plugin-helpers": "link:../../packages/kbn-plugin-helpers"
+  "name": "docket",
+  "version": "8.0.0",
+  "description": "Web frontend to query Google Stenographer",
+  "kibana": {
+    "version": "8.0.0"
+  },
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bndabbs/docket-plugin"
+  },
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/bndabbs/docket-plugin/issues"
+  },
+  "scripts": {
+    "kbn": "node ../../scripts/kbn",
+    "es": "node ../../scripts/es",
+    "lint": "eslint .",
+    "start": "node ../../scripts/kibana --dev --no-base-path",
+    "plugin-helpers": "node ../../scripts/plugin_helpers",
+    "archive": "pushd build/ && zip -r \"$npm_package_name\"-\"$npm_package_version\".zip kibana/ && popd"
   },
   "dependencies": {
-    "@elastic/elasticsearch": "^7.6.1",
-    "@grpc/proto-loader": "^0.5.3",
-    "@kbn/plugin-helpers": "link:../../packages/kbn-plugin-helpers",
-    "@types/google-protobuf": "^3.7.2",
-    "@types/yaml": "^1.2.0",
+    "@elastic/datemath": "link:../../packages/elastic-datemath",
+    "@elastic/elasticsearch": "^7.7.0",
+    "@elastic/eui": "^24.0.0",
+    "google-protobuf": "^3.12.1",
     "grpc": "^1.24.2",
-    "grpc-tools": "^1.8.1",
-    "grpc_tools_node_protoc_ts": "^2.5.10",
+    "lodash.clonedeep": "^4.5.0",
+    "moment": "^2.24.0",
+    "promise": "^8.1.0",
     "uid": "^1.0.0",
-    "yaml": "^1.8.3"
+    "yaml": "^1.10.0"
+  },
+  "devDependencies": {
+    "eslint-plugin-react-hooks": "^4.0.4",
+    "typescript": "^3.9.3"
   }
 }

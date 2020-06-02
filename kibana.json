@@ -1,10 +1,9 @@
 {
   "id": "docket",
-  "version": "8.0.0",
-  "kibanaVersion": "kibana",
+  "version": "kibana",
   "server": true,
   "ui": true,
-  "configPath": ["xpack", "docket"],
-  "requiredPlugins": ["data","uiActions"],
+  "configPath": ["docket"],
+  "requiredPlugins": ["data","uiActions","navigation"],
   "optionalPlugins": []
 }

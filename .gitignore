@@ -3,3 +3,5 @@ target/**
 /.idea/**
 yarn-error.log
 .DS_store
+build/**
+.eslintcache
