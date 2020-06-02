@@ -3,42 +3,45 @@ export const configMapping = {
     stenographer: {
       properties: {
         host: {
-          type: 'keyword'
+          type: 'keyword',
         },
-        client_key: {
-          type: 'keyword'
+        port: {
+          type: 'long',
         },
-        client_certificate: {
-          type: 'keyword'
-        },
-        certificate_authority: {
-          type: 'keyword'
-        },
-        pcap_path: {
-          type: 'keyword'
-        }
-      }
-    }
-  }
-}
+      },
+    },
+  },
+};
 
 export const queryMapping = {
+  properties: {
+    timestamp: {
+      type: 'date',
+    },
+    request: {
       properties: {
-        '\u0040timestamp': {
-          type: 'date'
+        start: {
+          type: 'keyword',
         },
-        request: {
+        end: {
+          type: 'keyword',
+        },
+        id: {
+          type: 'keyword',
+        },
+        query: {
+          type: 'keyword',
+        },
+      },
+    },
+    response: {
+      properties: {
+        status: {
           properties: {
-            user: {
-              type: 'text',
+            code: {
+              type: 'byte',
             },
-            start: {
-              type: 'keyword',
-            },
-            end: {
-              type: 'keyword',
-            },
-            query: {
+            details: {
               type: 'text',
               fields: {
                 keyword: {
@@ -47,46 +50,19 @@ export const queryMapping = {
                 },
               },
             },
-            tcpdump: {
-              type: 'text',
-              fields: {
-                keyword: {
-                  type: 'keyword',
-                  ignore_above: 256,
-                },
-              }
-            }
-          }
-        },
-        response: {
-          properties: {
-            status: {
+            metadata: {
               properties: {
-                code: {
-                  type: 'byte'
+                flags: {
+                  type: 'byte',
                 },
-                details: {
-                  type: 'text',
-                  fields: {
-                    keyword: {
-                      type: 'keyword',
-                      ignore_above: 256,
-                    },
-                  }
-                },
-                metadata: {
-                  properties: {
-                    flags: {
-                      type: 'byte'
-                    }
-                  }
-                }
-              }
+              },
             },
-            bytes: {
-              type: 'long',
-            },
-          }
-        }
-      }
-}
+          },
+        },
+        bytes: {
+          type: 'long',
+        },
+      },
+    },
+  },
+};
