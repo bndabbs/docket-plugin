@@ -12,8 +12,11 @@ The following is based on the assumption that you already have Stenographer inst
 
 This plugin has been built against the new [Kibana Platform](https://github.com/elastic/kibana/tree/master/src/core) and currently only works with source builds off of the Kibana master branch as a result.
 
-Install the plugin:
+**Install:**
+
 ```kibana-plugin install https://github.com/bndabbs/docket-plugin/releases/download/8.0.0-pre/docket-8.0.0-linux.zip```
+
+**Configure:**
 
 The code block below lists the default configuration. You can change any of the defaults by adding the to your `kibana.yml` file. 
 You will need to ensure that the user account running the Kibana binary has appropriate permissions to write to whatever paths are set for `certPath` and `pcapPath`.
@@ -47,3 +50,5 @@ certstrap --depot-path . sign kibana.dabbs.lan --CA stenographer
 # Export the client cert to a PKCS12 bundle
 openssl pkcs12 -export -out kibana.p12 -inkey kibana.dabbs.lan.key -in kibana.dabbs.lan.crt -certfile stenographer.crt
 ```
+
+At this point you can open Kibana in your browser and navigate to `app/docket/config` to point Kibana to your Stenographer host(s). Make sure that the hostname/IP you use matches the values in the server certificate.
