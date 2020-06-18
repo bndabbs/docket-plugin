@@ -1,9 +1,9 @@
 {
   "name": "docket",
-  "version": "8.0.0",
+  "version": "7.8.0",
   "description": "Web frontend to query Google Stenographer",
   "kibana": {
-    "version": "8.0.0"
+    "version": "7.8.0"
   },
   "private": true,
   "repository": {
