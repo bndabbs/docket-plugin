@@ -8,11 +8,11 @@ Docket is a web Frontend to Google Stenographer that allows you to securely subm
 
 The following is based on the assumption that you already have Stenographer installed with gRPC enabled.
 
-This plugin has been built against the new [Kibana Platform](https://github.com/elastic/kibana/tree/master/src/core) and currently only works with source builds off of the Kibana master branch as a result.
+This plugin has been built against the new [Kibana Platform](https://github.com/elastic/kibana/tree/master/src/core) and currently only works with Kibana 7.8.0 and newer as a result.
 
 **Install:**
 
-```kibana-plugin install https://github.com/bndabbs/docket-plugin/releases/download/8.0.0-pre/docket-8.0.0-linux.zip```
+```kibana-plugin install https://github.com/bndabbs/docket-plugin/releases/download/7.8.0/docket-7.8.0-linux.zip```
 
 **Configure:**
 
