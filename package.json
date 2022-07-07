@@ -29,7 +29,7 @@
     "google-protobuf": "^3.12.1",
     "grpc": "^1.24.2",
     "lodash.clonedeep": "^4.5.0",
-    "moment": "^2.24.0",
+    "moment": "^2.29.4",
     "promise": "^8.1.0",
     "uid": "^1.0.0",
     "yaml": "^1.10.0"
